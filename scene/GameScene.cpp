@@ -1,6 +1,7 @@
 ﻿#include "GameScene.h"
 #include "TextureManager.h"
 #include <cassert>
+#include <random>
 
 using namespace DirectX;
 
@@ -18,67 +19,53 @@ void GameScene::Initialize() {
 	audio_ = Audio::GetInstance();
 	debugText_ = DebugText::GetInstance();
 	textureHandle_ = TextureManager::Load("kasuga.png");
-	//スプライト初期化
-	/*sprite_ = Sprite::Create(textureHandle_, {100, 50});*/
+
+	//乱数シード生成器
+	std::random_device seed_gen;
+	//メルセンヌツイスター
+	std::mt19937_64 engine(seed_gen());
+	//乱数範囲（回転角用）
+	std::uniform_real_distribution<float> rotDist(0.0f, XM_2PI);
+	//乱数範囲（座標用）
+	std::uniform_real_distribution<float> posDist(-10.0f, 10.0f);
+
+
 	//モデル初期化
 	model_ = Model::Create();
-	// x,y,z方向のスケーリングを設定
-	worldTransform_.scale_ = {5.0f, 5.0f, 5.0f};
-	// x,y,z軸回りの回転角を設定
-	worldTransform_.rotation_ = {XM_PI / 4.0f, XM_PI / 4.0f, 0.0f};
-	// x,y,zの位置を設定
-	worldTransform_.translation_ = {10.0f, 10.0f, 10.0f};
-	//ワールドトランスフォーム初期化
-	worldTransform_.Initialize();
+
+	for (size_t i = 0; i < _countof(worldTransform_); i++) {
+
+		// x,y,z方向のスケーリングを設定
+		worldTransform_[i].scale_ = {1.0f, 1.0f, 1.0f};
+		// x,y,z軸回りの回転角を設定
+		worldTransform_[i].rotation_ = {rotDist(engine), rotDist(engine), rotDist(engine)};
+		// x,y,zの位置を設定
+		worldTransform_[i].translation_ = {posDist(engine), posDist(engine), posDist(engine)};
+		//ワールドトランスフォーム初期化
+		worldTransform_[i].Initialize();
+	}
+
+	//カメラの視点座標を設定
+	viewProjection_.eye = {0, 0, -10};
+
 	//ビュープロジェクション初期化
 	viewProjection_.Initialize();
-	////サウンドデータの読み込み
-	// soundDataHandle_ = audio_->LoadWave("fanfare.wav");
-	////サウンド再生
-	// audio_->PlayWave(soundDataHandle_,true);
 }
 
 void GameScene::Update() {
-	////スプライトの今の座標を取得
-	// XMFLOAT2 position = sprite_->GetPosition();
-	////座標を{2,0}移動
-	// position = {position.x + 2.0f, position.y + 1.0f};
-	// sprite_->SetPosition(position);
-
-	////スペースキーを押した瞬間
-	// if (input_->TriggerKey(DIK_SPACE))
-	//{
-	//	//音声停止
-	//	audio_->StopWave(soundDataHandle_);
-	// }
-
-	//デバックテキストの表示
-	/*debugText_->Print("kaizokuou ni oreha naru.", 50, 50, 1.0f);*/
-
-	//書式指定付き表示
-	/*debugText_->SetPos(50, 70);
-	debugText_->Printf("year%d", 2001);*/
-
-	////変数の値をインクリメント
-	// value_++;
-	////値を含んだ文字列
-	// std::string strDebug = std::string("Value:") + std::to_string(value_);
-	////デバッグテキストの表示
-	// debugText_->Print(strDebug, 50, 50, 1.0f);
-
-	// x,y,z変換表示
-	debugText_->SetPos(50, 0);
-	debugText_->Printf(
-	  "scale %f,%f,%f\n", worldTransform_.scale_.x, worldTransform_.scale_.y,
-	  worldTransform_.scale_.z);
-	debugText_->SetPos(50, 50);
-	debugText_->Printf(
-	  "rotation %f,%f,%f", worldTransform_.rotation_.x, worldTransform_.rotation_.y,
-	  worldTransform_.rotation_.z);
-	debugText_->SetPos(50, 100);
-	debugText_->Printf(
-	  "translation %f,%f,%f", worldTransform_.translation_.x, worldTransform_.translation_.y,
-	  worldTransform_.translation_.z);
+	//// x,y,z変換表示
+	//debugText_->SetPos(50, 0);
+	//debugText_->Printf(
+	//  "scale %f,%f,%f\n", worldTransform_.scale_.x, worldTransform_.scale_.y,
+	//  worldTransform_.scale_.z);
+	//debugText_->SetPos(50, 50);
+	//debugText_->Printf(
+	//  "rotation %f,%f,%f", worldTransform_.rotation_.x, worldTransform_.rotation_.y,
+	//  worldTransform_.rotation_.z);
+	//debugText_->SetPos(50, 100);
+	//debugText_->Printf(
+	//  "translation %f,%f,%f", worldTransform_.translation_.x, worldTransform_.translation_.y,
+	//  worldTransform_.translation_.z);
 }
 
 void GameScene::Draw() {
@@ -107,7 +94,9 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	model_->Draw(worldTransform_, viewProjection_, textureHandle_);
+	for (size_t i = 0; i < _countof(worldTransform_); i++) {
+		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
+	}
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
