@@ -46,26 +46,77 @@ void GameScene::Initialize() {
 	}
 
 	//カメラの視点座標を設定
-	viewProjection_.eye = {0, 0, -10};
+	viewProjection_.eye = {0, 0, -50};
+
+	//カメラ注視点座標を設定
+	viewProjection_.target = {10, 0, 0};
 
 	//ビュープロジェクション初期化
 	viewProjection_.Initialize();
+
+	//カメラ上方向ベクトルを設定（右上90度指定）
+	viewProjection_.up = {cosf(XM_PI / 2.0f),
+		sinf(XM_PI / 2.0f), 0.0f};
 }
 
 void GameScene::Update() {
-	//// x,y,z変換表示
-	//debugText_->SetPos(50, 0);
-	//debugText_->Printf(
-	//  "scale %f,%f,%f\n", worldTransform_.scale_.x, worldTransform_.scale_.y,
-	//  worldTransform_.scale_.z);
-	//debugText_->SetPos(50, 50);
-	//debugText_->Printf(
-	//  "rotation %f,%f,%f", worldTransform_.rotation_.x, worldTransform_.rotation_.y,
-	//  worldTransform_.rotation_.z);
-	//debugText_->SetPos(50, 100);
-	//debugText_->Printf(
-	//  "translation %f,%f,%f", worldTransform_.translation_.x, worldTransform_.translation_.y,
-	//  worldTransform_.translation_.z);
+	
+	//視点の移動ベクトル
+	XMFLOAT3 move1 = {0, 0, 0};
+	//視点の移動速さ
+	const float kEyeSpeed = 0.2f;
+	
+	//注視点の移動ベクトル
+	XMFLOAT3 move = {0, 0, 0};
+	//注視点の移動速さ
+	const float kTargetSpeed = 0.2f;
+
+	//上方向の回転移動速さ[ラジアン/frame]
+	const float kUpRotSpeed = 0.05f;
+
+	//押した方向で移動ベクトルを変更
+	if (input_->PushKey(DIK_W)) {
+		move1 = {0, 0, kEyeSpeed};
+	} else if (input_->PushKey(DIK_S)) {
+		move1 = {0, 0, -kEyeSpeed};
+	}
+	if (input_->PushKey(DIK_LEFT)) {
+		move = {-kTargetSpeed, 0, 0};
+	} else if (input_->PushKey(DIK_RIGHT)) {
+		move = {kTargetSpeed, 0, 0};
+	}
+	if (input_->PushKey(DIK_SPACE)) {
+		viewAngle += kUpRotSpeed;
+		//2π超えたら0に戻す
+		viewAngle = fmodf(viewAngle, XM_2PI);
+	}
+	//視点移動（ベクトルの加算）
+	viewProjection_.eye.x += move1.x;
+	viewProjection_.eye.y += move1.y;
+	viewProjection_.eye.z += move1.z;
+	//視点移動（ベクトルの加算）
+	viewProjection_.target.x += move.x;
+	viewProjection_.target.y += move.y;
+	viewProjection_.target.z += move.z;
+	//上方向ベクトルを計算（半径1の円周上の座標）
+	viewProjection_.up = {cosf(viewAngle), 
+		sinf(viewAngle), 0.0f};
+	//行列の再計算
+	viewProjection_.UpdateMatrix();
+	//デバック用表示
+	debugText_->SetPos(50, 50);
+	debugText_->Printf(
+	  "eye: %f,%f,%f\n", viewProjection_.eye.x, 
+		viewProjection_.eye.y, viewProjection_.eye.z);
+	debugText_->SetPos(50, 70);
+	debugText_->Printf(
+	  "target: %f,%f,%f\n", viewProjection_.target.x,
+		viewProjection_.target.y, viewProjection_.target.z);
+	debugText_->SetPos(50, 90);
+	debugText_->Printf(
+	  "up: %f,%f,%f\n", viewProjection_.up.x, viewProjection_.up.y,
+	  viewProjection_.up.z);
+	
 }
 
 void GameScene::Draw() {
