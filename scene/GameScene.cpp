@@ -114,8 +114,7 @@ void GameScene::Update() {
 		viewProjection_.target.y, viewProjection_.target.z);
 	debugText_->SetPos(50, 90);
 	debugText_->Printf(
-	  "up: %f,%f,%f\n", viewProjection_.up.x, viewProjection_.up.y,
-	  viewProjection_.up.z)
+	  "up: %f,%f,%f\n", viewProjection_.up.x, viewProjection_.up.y, viewProjection_.up.z);
 	
 }
 
