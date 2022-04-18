@@ -75,7 +75,7 @@ void GameScene::Update() {
 		  worldTransform_.translation_.x + normalFLength.x * 0.1f,
 		  worldTransform_.translation_.y + normalFLength.y * 0.1f,
 		  worldTransform_.translation_.z + normalFLength.z * 0.1f};
-	} else if (input_->PushKey(DIK_DOWN)) {
+	}if (input_->PushKey(DIK_DOWN)) {
 		worldTransform_.translation_ = {
 		  worldTransform_.translation_.x - normalFLength.x * 0.1f,
 		  worldTransform_.translation_.y - normalFLength.y * 0.1f,
