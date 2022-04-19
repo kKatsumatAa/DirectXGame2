@@ -26,6 +26,11 @@ void GameScene::Initialize() {
 	viewProjection_.eye = {0, 20, -30};
 	viewProjection_.target = {0, 0, 0};
 
+	for (size_t i = 0; i < _countof(worldTransform_bullet); i++) {
+		worldTransform_bullet[i].scale_ = {0.3f, 0.3f, 0.3f};
+		worldTransform_bullet[i].Initialize();
+	}
+
 	//ビュープロジェクション初期化
 	viewProjection_.Initialize();
 
@@ -84,11 +89,43 @@ void GameScene::Update() {
 
 	
 	
+	//弾撃つ
+	if (input_->TriggerKey(DIK_SPACE)) {
+		for (size_t i = 0; i < _countof(worldTransform_bullet); i++) {
+			if (isShot[i] == false) {
+				isShot[i] = true;
+				worldTransform_bullet[i].rotation_ = worldTransform_.rotation_;
+				worldTransform_bullet[i].translation_ = worldTransform_.translation_;
+				shotTimer[i] = 120;
+
+				break;
+			}
+		}
+	}
+
+	for (size_t i = 0; i < _countof(worldTransform_bullet); i++) {
+		if (isShot[i]) {
+			worldTransform_bullet[i].translation_ = {
+			  worldTransform_bullet[i].translation_.x +
+			    sinf(worldTransform_bullet[i].rotation_.y) * shotVelocity,
+			  worldTransform_bullet[i].translation_.y,
+			  worldTransform_bullet[i].translation_.z +
+			    cosf(worldTransform_bullet[i].rotation_.y) * shotVelocity};
+			shotTimer[i]--;
+			if (shotTimer[i] <= 0) {
+				isShot[i] = false;
+			}
+		}
+	}
+
 	//行列の再計算
 	worldTransform_.UpdateMatrix();
+	for (size_t i = 0; i < _countof(worldTransform_bullet); i++) {
+		worldTransform_bullet[i].UpdateMatrix();
+	}
 
-	/*debugText_->SetPos(50, 130);
-	debugText_->Printf("nearZ: %f\n", viewProjection_.nearZ);*/
+	debugText_->SetPos(50, 130);
+	debugText_->Printf("shotTimer: %d\n", shotTimer[0]);
 }
 
 void GameScene::Draw() {
@@ -119,6 +156,11 @@ void GameScene::Draw() {
 	/// </summary>
 	model_->Draw(worldTransform_, viewProjection_, textureHandle_);
 	
+	for (size_t i = 0; i < _countof(worldTransform_bullet); i++) {
+		if (isShot[i] == true) {
+			model_->Draw(worldTransform_bullet[i], viewProjection_, textureHandle_);
+		}
+	}
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();

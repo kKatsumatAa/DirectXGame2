@@ -55,9 +55,13 @@ class GameScene {
 	Model* model_ = nullptr;
 	//ワールドトランスフォーム
 	WorldTransform worldTransform_;
+	WorldTransform worldTransform_bullet[10];
 	//ビュープロジェクション
 	ViewProjection viewProjection_;
-	
+	//弾用
+	const float shotVelocity = 5.0f;
+	bool isShot[10] = {false};
+	int shotTimer[10] = {0};
 	
 
 	/// <summary>
