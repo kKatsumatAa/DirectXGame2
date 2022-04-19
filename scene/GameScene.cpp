@@ -43,6 +43,10 @@ void GameScene::Initialize() {
 		//ワールドトランスフォーム初期化
 		worldTransform_[i].Initialize();
 	}
+	for (size_t i = 0; i < _countof(worldTransform_bullet); i++) {
+		worldTransform_bullet[i].scale_ = {0.3f, 0.3f, 0.3f};
+		worldTransform_bullet[i].Initialize();
+	}
 	
 	viewProjection_.eye = {0, 20, -30};
 	viewProjection_.target = {0, 0, 0};
@@ -69,6 +73,12 @@ void GameScene::Update() {
 
 	const float cameraLength =
 	  sqrtf(cameraVec.y * cameraVec.y + cameraVec.z * cameraVec.z); // xは0なので今回は省略！！
+
+	//弾用
+	
+	const float shotVelocity = 5.0f;
+	
+
 
 	const float frontSpeed = 0.5f;
 
@@ -115,14 +125,47 @@ void GameScene::Update() {
 	  worldTransform_[0].translation_.z - cosf(worldTransform_[0].rotation_.y) * cameraLength};
 	//正面ベクトルとは逆方向のベクトルなのでマイナスの値にする！？
 
+	//注視点をオブジェクトに固定
 	viewProjection_.target = worldTransform_->translation_;
+
+	//弾撃つ
+	if (input_->TriggerKey(DIK_SPACE)) {
+		for (size_t i = 0; i < _countof(worldTransform_bullet); i++) {
+			if (isShot[i] == false) {
+				isShot[i] = true;
+				worldTransform_bullet[i].rotation_ = worldTransform_[0].rotation_;
+				worldTransform_bullet[i].translation_ = worldTransform_[0].translation_;
+				shotTimer[i] = 120;
+
+				break;
+			}
+		}
+	}
+
+	for (size_t i = 0; i < _countof(worldTransform_bullet); i++) {
+		if (isShot[i]) 
+		{
+			worldTransform_bullet[i].translation_ = {
+				worldTransform_bullet[i].translation_.x + sinf(worldTransform_bullet[i].rotation_.y) * shotVelocity,
+				worldTransform_bullet[i].translation_.y,
+				worldTransform_bullet[i].translation_.z + cosf(worldTransform_bullet[i].rotation_.y) * shotVelocity
+			};
+			shotTimer[i]--;
+			if (shotTimer[i] <= 0) {
+				isShot[i] = false;
+			}
+		}
+	}
 	
 	//行列の再計算
 	worldTransform_[0].UpdateMatrix();
 	viewProjection_.UpdateMatrix();
+	for (size_t i = 0; i < _countof(worldTransform_bullet); i++) {
+		worldTransform_bullet[i].UpdateMatrix();
+	}
 
-	/*debugText_->SetPos(50, 130);
-	debugText_->Printf("nearZ: %f\n", viewProjection_.nearZ);*/
+	debugText_->SetPos(50, 130);
+	debugText_->Printf("shotTimer: %d\n", shotTimer[0]);
 }
 
 void GameScene::Draw() {
@@ -153,6 +196,12 @@ void GameScene::Draw() {
 	/// </summary>
 	for (size_t i = 0; i < _countof(worldTransform_); i++) {
 		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
+	}
+
+	for (size_t i = 0; i < _countof(worldTransform_bullet); i++) {
+		if (isShot[i]==true) {
+			model_->Draw(worldTransform_bullet[i], viewProjection_, textureHandle_);
+		}
 	}
 	
 
