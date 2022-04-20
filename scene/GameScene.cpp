@@ -26,7 +26,7 @@ void GameScene::Initialize() {
 	//乱数範囲（回転角用）
 	std::uniform_real_distribution<float> rotDist(0.0f, XM_2PI);
 	//乱数範囲（座標用）
-	std::uniform_real_distribution<float> posDist(-10.0f, 10.0f);
+	std::uniform_real_distribution<float> posDist(-20.0f, 20.0f);
 
 	//モデル初期化
 	model_ = Model::Create();
@@ -39,7 +39,7 @@ void GameScene::Initialize() {
 		// x,y,z軸回りの回転角を設定
 		worldTransform_[i].rotation_ = {rotDist(engine), rotDist(engine), rotDist(engine)};
 		// x,y,zの位置を設定
-		worldTransform_[i].translation_ = {posDist(engine), posDist(engine), posDist(engine)};
+		worldTransform_[i].translation_ = {posDist(engine), posDist(engine) / 2, posDist(engine)};
 		//ワールドトランスフォーム初期化
 		worldTransform_[i].Initialize();
 	}
@@ -118,15 +118,14 @@ void GameScene::Update() {
 	}
 
 
-	//カメラ追従
+	//カメラをオブジェと同じ位置
 	viewProjection_.eye = {
-	  worldTransform_[0].translation_.x - sinf(worldTransform_[0].rotation_.y) * cameraLength,
-	  worldTransform_[0].translation_.y + cosf(worldTransform_[0].rotation_.x) * cameraLength,
-	  worldTransform_[0].translation_.z - cosf(worldTransform_[0].rotation_.y) * cameraLength};
-	//正面ベクトルとは逆方向のベクトルなのでマイナスの値にする！？
+	  worldTransform_[0].translation_.x ,
+	  worldTransform_[0].translation_.y ,
+	  worldTransform_[0].translation_.z };
 
-	//注視点をオブジェクトに固定
-	viewProjection_.target = worldTransform_->translation_;
+	//注視点を正面ベクトルの終点に設定
+	viewProjection_.target = endPoint;
 
 	//弾撃つ
 	if (input_->TriggerKey(DIK_SPACE)) {
