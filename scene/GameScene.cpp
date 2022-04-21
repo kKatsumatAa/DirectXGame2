@@ -86,10 +86,10 @@ void GameScene::Update() {
 		worldTransform_[0].rotation_.y += frontSpeed / 10;
 	}
 	//x軸中心回転
-	if (input_->PushKey(DIK_UP)) {
+	if (input_->PushKey(DIK_UP) && worldTransform_[0].rotation_.x < XM_PI / 2) {
 		worldTransform_[0].rotation_.x += frontSpeed / 10;
 	}
-	if (input_->PushKey(DIK_DOWN)) {
+	if (input_->PushKey(DIK_DOWN) && worldTransform_[0].rotation_.x > (-XM_PI / 2)) {
 		worldTransform_[0].rotation_.x -= frontSpeed / 10;
 	}
 
