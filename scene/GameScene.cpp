@@ -107,12 +107,12 @@ void GameScene::Update() {
 	if (input_->PushKey(DIK_W)) {
 		worldTransform_[0].translation_ = {
 		  worldTransform_[0].translation_.x + normalFLength.x * 0.1f,
-		  worldTransform_[0].translation_.y + normalFLength.y * 0.1f,
+		  worldTransform_[0].translation_.y,
 		  worldTransform_[0].translation_.z + normalFLength.z * 0.1f};
 	}if (input_->PushKey(DIK_S)) {
 		worldTransform_[0].translation_ = {
 		  worldTransform_[0].translation_.x - normalFLength.x * 0.1f,
-		  worldTransform_[0].translation_.y - normalFLength.y * 0.1f,
+		  worldTransform_[0].translation_.y,
 		  worldTransform_[0].translation_.z - normalFLength.z * 0.1f};
 	}
 	//横移動
@@ -130,16 +130,13 @@ void GameScene::Update() {
 	if (input_->PushKey(DIK_D)) {			  
 		worldTransform_[0].translation_ = {	  
 		  worldTransform_[0].translation_.x + rightLength.x * 0.1f,
-		  worldTransform_[0].translation_.y + rightLength.y * 0.1f,
+		  worldTransform_[0].translation_.y,
 		  worldTransform_[0].translation_.z + rightLength.z * 0.1f};
 	}
 
 
 	//カメラをオブジェと同じ位置
-	viewProjection_.eye = {
-	  worldTransform_[0].translation_.x ,
-	  worldTransform_[0].translation_.y ,
-	  worldTransform_[0].translation_.z };
+	viewProjection_.eye = worldTransform_[0].translation_;
 
 	//正面ベクトルの終点を、オブジェクトの回転に合わせて一緒に回転
 	endPoint = {
