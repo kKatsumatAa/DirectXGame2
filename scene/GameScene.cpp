@@ -32,7 +32,7 @@ void GameScene::Initialize() {
 	model_ = Model::Create();
 
 	//world
-	for (size_t i = 1; i < _countof(worldTransform_); i++) {
+	for (size_t i = 2; i < _countof(worldTransform_); i++) {
 
 		// x,y,z方向のスケーリングを設定
 		worldTransform_[i].scale_ = {1.0f, 1.0f, 1.0f};
@@ -47,6 +47,13 @@ void GameScene::Initialize() {
 		worldTransform_bullet[i].scale_ = {0.3f, 0.3f, 0.3f};
 		worldTransform_bullet[i].Initialize();
 	}
+
+	// 床のx,y,z方向のスケーリングを設定
+	worldTransform_[1].scale_ = {50.0f, 1.0f, 50.0f};
+	// 床のx,y,zの位置を設定
+	worldTransform_[1].translation_ = {0, -5, 0};
+	//ワールドトランスフォーム初期化
+	worldTransform_[1].Initialize();
 	
 	viewProjection_.eye = {0, 20, -30};
 	viewProjection_.target = {0, 0, 0};
