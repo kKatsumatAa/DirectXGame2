@@ -68,12 +68,6 @@ void GameScene::Update() {
 	//正規化したベクトル
 	XMFLOAT3 normalFLength = {0, 0, 0};
 
-	////オブジェからカメラまでの距離
-	//const XMFLOAT3 cameraVec = {0, 20, -30};
-
-	//const float cameraLength =
-	//  sqrtf(cameraVec.y * cameraVec.y + cameraVec.z * cameraVec.z); // xは0なので今回は省略！！
-
 	//弾用
 	const float shotVelocity = 5.0f;
 
@@ -96,7 +90,7 @@ void GameScene::Update() {
 	//正面ベクトルの終点を、オブジェクトの回転に合わせて一緒に回転
 	endPoint = {
 	  worldTransform_[0].translation_.x + sinf(worldTransform_[0].rotation_.y) * frontLength,
-	  worldTransform_[0].translation_.y + sinf(worldTransform_[0].rotation_.x) * frontLength,
+	  worldTransform_[0].translation_.y + sinf(worldTransform_[0].rotation_.x) * frontLength,//yだけx軸中心の角度使う
 	  worldTransform_[0].translation_.z + cosf(worldTransform_[0].rotation_.y) * frontLength};
 
 	//正面ベクトルの成分を計算
@@ -150,13 +144,8 @@ void GameScene::Update() {
 	//正面ベクトルの終点を、オブジェクトの回転に合わせて一緒に回転
 	endPoint = {
 	  worldTransform_[0].translation_.x + sinf(worldTransform_[0].rotation_.y) * frontLength,
-	  worldTransform_[0].translation_.y + sinf(worldTransform_[0].rotation_.x) * frontLength,
+	  worldTransform_[0].translation_.y + sinf(worldTransform_[0].rotation_.x) * frontLength,//yだけx軸中心の角度使う
 	  worldTransform_[0].translation_.z + cosf(worldTransform_[0].rotation_.y) * frontLength};
-
-	/*viewProjection_.target = {
-	  endPoint.x,
-	  worldTransform_[0].translation_.y + sinf(worldTransform_[0].rotation_.x) * frontLength,
-	  endPoint.z};*/
 
 	//注視点を正面ベクトルの終点に設定
 	viewProjection_.target = endPoint;
@@ -182,7 +171,7 @@ void GameScene::Update() {
 			  worldTransform_bullet[i].translation_.x +
 			    sinf(worldTransform_bullet[i].rotation_.y) * shotVelocity,
 			  worldTransform_bullet[i].translation_.y +
-			    sinf(worldTransform_bullet[i].rotation_.x) * shotVelocity,
+			    sinf(worldTransform_bullet[i].rotation_.x) * shotVelocity,//yだけx軸中心の角度使う
 			  worldTransform_bullet[i].translation_.z +
 			    cosf(worldTransform_bullet[i].rotation_.y) * shotVelocity};
 			shotTimer[i]--;
