@@ -124,7 +124,7 @@ void GameScene::Update() {
 	if (input_->PushKey(DIK_A)) {
 		worldTransform_[0].translation_ = {
 		  worldTransform_[0].translation_.x - rightLength.x * 0.1f,
-		  worldTransform_[0].translation_.y - rightLength.y * 0.1f,
+		  worldTransform_[0].translation_.y,
 		  worldTransform_[0].translation_.z - rightLength.z * 0.1f};
 	}										  
 	if (input_->PushKey(DIK_D)) {			  
