@@ -68,30 +68,35 @@ void GameScene::Update() {
 	//正規化したベクトル
 	XMFLOAT3 normalFLength = {0, 0, 0};
 
-	//オブジェからカメラまでの距離
-	XMFLOAT3 cameraVec = {0, 20, -30};
+	////オブジェからカメラまでの距離
+	//const XMFLOAT3 cameraVec = {0, 20, -30};
 
-	const float cameraLength =
-	  sqrtf(cameraVec.y * cameraVec.y + cameraVec.z * cameraVec.z); // xは0なので今回は省略！！
+	//const float cameraLength =
+	//  sqrtf(cameraVec.y * cameraVec.y + cameraVec.z * cameraVec.z); // xは0なので今回は省略！！
 
 	//弾用
-	
 	const float shotVelocity = 5.0f;
-	
-
 
 	const float frontSpeed = 0.5f;
 
+	//y軸中心回転
 	if (input_->PushKey(DIK_LEFT)) {
 		worldTransform_[0].rotation_.y -= frontSpeed / 10;
 	}if (input_->PushKey(DIK_RIGHT)) {
 		worldTransform_[0].rotation_.y += frontSpeed / 10;
 	}
+	//x軸中心回転
+	if (input_->PushKey(DIK_UP)) {
+		worldTransform_[0].rotation_.x += frontSpeed / 10;
+	}
+	if (input_->PushKey(DIK_DOWN)) {
+		worldTransform_[0].rotation_.x -= frontSpeed / 10;
+	}
 
 	//正面ベクトルの終点を、オブジェクトの回転に合わせて一緒に回転
 	endPoint = {
 	  worldTransform_[0].translation_.x + sinf(worldTransform_[0].rotation_.y) * frontLength,
-	  worldTransform_[0].translation_.y,
+	  worldTransform_[0].translation_.y + sinf(worldTransform_[0].rotation_.x) * frontLength,
 	  worldTransform_[0].translation_.z + cosf(worldTransform_[0].rotation_.y) * frontLength};
 
 	//正面ベクトルの成分を計算
@@ -105,16 +110,34 @@ void GameScene::Update() {
 
 
 	//押した方向で移動ベクトルを変更
-	if (input_->PushKey(DIK_UP)) {
+	if (input_->PushKey(DIK_W)) {
 		worldTransform_[0].translation_ = {
 		  worldTransform_[0].translation_.x + normalFLength.x * 0.1f,
 		  worldTransform_[0].translation_.y + normalFLength.y * 0.1f,
 		  worldTransform_[0].translation_.z + normalFLength.z * 0.1f};
-	}if (input_->PushKey(DIK_DOWN)) {
+	}if (input_->PushKey(DIK_S)) {
 		worldTransform_[0].translation_ = {
 		  worldTransform_[0].translation_.x - normalFLength.x * 0.1f,
 		  worldTransform_[0].translation_.y - normalFLength.y * 0.1f,
 		  worldTransform_[0].translation_.z - normalFLength.z * 0.1f};
+	}
+	//横移動
+	XMFLOAT3 rightLength = {
+	  sinf(worldTransform_[0].rotation_.y + XM_PI / 2), //90度足している
+	  worldTransform_[0].translation_.y,
+	  cosf(worldTransform_[0].rotation_.y + XM_PI / 2)};
+
+	if (input_->PushKey(DIK_A)) {
+		worldTransform_[0].translation_ = {
+		  worldTransform_[0].translation_.x - rightLength.x * 0.1f,
+		  worldTransform_[0].translation_.y - rightLength.y * 0.1f,
+		  worldTransform_[0].translation_.z - rightLength.z * 0.1f};
+	}										  
+	if (input_->PushKey(DIK_D)) {			  
+		worldTransform_[0].translation_ = {	  
+		  worldTransform_[0].translation_.x + rightLength.x * 0.1f,
+		  worldTransform_[0].translation_.y + rightLength.y * 0.1f,
+		  worldTransform_[0].translation_.z + rightLength.z * 0.1f};
 	}
 
 
@@ -123,6 +146,17 @@ void GameScene::Update() {
 	  worldTransform_[0].translation_.x ,
 	  worldTransform_[0].translation_.y ,
 	  worldTransform_[0].translation_.z };
+
+	//正面ベクトルの終点を、オブジェクトの回転に合わせて一緒に回転
+	endPoint = {
+	  worldTransform_[0].translation_.x + sinf(worldTransform_[0].rotation_.y) * frontLength,
+	  worldTransform_[0].translation_.y + sinf(worldTransform_[0].rotation_.x) * frontLength,
+	  worldTransform_[0].translation_.z + cosf(worldTransform_[0].rotation_.y) * frontLength};
+
+	/*viewProjection_.target = {
+	  endPoint.x,
+	  worldTransform_[0].translation_.y + sinf(worldTransform_[0].rotation_.x) * frontLength,
+	  endPoint.z};*/
 
 	//注視点を正面ベクトルの終点に設定
 	viewProjection_.target = endPoint;
@@ -145,10 +179,12 @@ void GameScene::Update() {
 		if (isShot[i]) 
 		{
 			worldTransform_bullet[i].translation_ = {
-				worldTransform_bullet[i].translation_.x + sinf(worldTransform_bullet[i].rotation_.y) * shotVelocity,
-				worldTransform_bullet[i].translation_.y,
-				worldTransform_bullet[i].translation_.z + cosf(worldTransform_bullet[i].rotation_.y) * shotVelocity
-			};
+			  worldTransform_bullet[i].translation_.x +
+			    sinf(worldTransform_bullet[i].rotation_.y) * shotVelocity,
+			  worldTransform_bullet[i].translation_.y +
+			    sinf(worldTransform_bullet[i].rotation_.x) * shotVelocity,
+			  worldTransform_bullet[i].translation_.z +
+			    cosf(worldTransform_bullet[i].rotation_.y) * shotVelocity};
 			shotTimer[i]--;
 			if (shotTimer[i] <= 0) {
 				isShot[i] = false;
@@ -193,7 +229,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	for (size_t i = 0; i < _countof(worldTransform_); i++) {
+	for (size_t i = 1; i < _countof(worldTransform_); i++) {
 		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
 	}
 
