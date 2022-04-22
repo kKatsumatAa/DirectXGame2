@@ -23,10 +23,12 @@ void GameScene::Initialize() {
 	for (size_t y = 0; y < maxY; y++) {
 
 		for (size_t x = 0; x < maxX; x++) {
-			// x,y,zの位置を設定
-			worldTransform_[y][x].translation_ = {-20.0f + 5 * x, 20.0f - 5 * y, 5.0f};
-			//ワールドトランスフォーム初期化
-			worldTransform_[y][x].Initialize();
+			for (size_t z = 0; z < maxZ; z++) {
+				// x,y,zの位置を設定
+				worldTransform_[y][x][z].translation_ = {-20.0f + 5 * x, 20.0f - 5 * y, 5.0f + 5 * z};
+				//ワールドトランスフォーム初期化
+				worldTransform_[y][x][z].Initialize();
+			}
 		}
 	}
 	//ビュープロジェクション初期化
@@ -65,8 +67,8 @@ void GameScene::Draw() {
 	for (size_t y = 0; y < maxY; y++) {
 
 		for (size_t x = 0; x < maxX; x++) {
-			if (x % 2 == 0 || y % 2 == 0) {
-				model_->Draw(worldTransform_[y][x], viewProjection_, textureHandle_);
+			for (size_t z = 0; z < maxZ; z++) {
+				model_->Draw(worldTransform_[y][x][z], viewProjection_, textureHandle_);
 			}
 		}
 	}

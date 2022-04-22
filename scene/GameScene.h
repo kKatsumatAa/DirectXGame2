@@ -56,7 +56,8 @@ class GameScene {
 	//ワールドトランスフォーム
 	const int maxX = 9;
 	const int maxY = 9;
-	WorldTransform worldTransform_[9][9];
+	const int maxZ = 9;
+	WorldTransform worldTransform_[9][9][9];
 	//ビュープロジェクション
 	ViewProjection viewProjection_;
 
