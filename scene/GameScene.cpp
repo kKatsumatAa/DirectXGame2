@@ -20,19 +20,14 @@ void GameScene::Initialize() {
 	textureHandle_ = TextureManager::Load("kasuga.png");
 	//モデル初期化
 	model_ = Model::Create();
-	for (size_t i = 0; i < _countof(worldTransform_); i++) {
+	for (size_t y = 0; y < maxY; y++) {
 
-		// x,y,z方向のスケーリングを設定
-		worldTransform_[i].scale_ = {5.0f, 5.0f, 5.0f};
-		// x,y,zの位置を設定
-		if (i < _countof(worldTransform_) / 2) {
-			worldTransform_[i].translation_ = { -40.0f + (worldTransform_[i].scale_.x * 2) * i, 20.0f, 0.0f};
-		} else {
-			worldTransform_[i].translation_ = {-40.0f + (worldTransform_[i].scale_.x * 2) 
-				* (i - _countof(worldTransform_) / 2), -20.0f, 0.0f};
+		for (size_t x = 0; x < maxX; x++) {
+			// x,y,zの位置を設定
+			worldTransform_[y][x].translation_ = {-20.0f + 5 * x, 20.0f - 5 * y, 5.0f};
+			//ワールドトランスフォーム初期化
+			worldTransform_[y][x].Initialize();
 		}
-		//ワールドトランスフォーム初期化
-		worldTransform_[i].Initialize();
 	}
 	//ビュープロジェクション初期化
 	viewProjection_.Initialize();
@@ -67,8 +62,13 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	for (size_t i = 0; i < _countof(worldTransform_); i++) {
-		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
+	for (size_t y = 0; y < maxY; y++) {
+
+		for (size_t x = 0; x < maxX; x++) {
+			if (x % 2 == 0 || y % 2 == 0) {
+				model_->Draw(worldTransform_[y][x], viewProjection_, textureHandle_);
+			}
+		}
 	}
 
 	// 3Dオブジェクト描画後処理
