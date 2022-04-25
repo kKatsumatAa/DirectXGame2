@@ -55,9 +55,9 @@ class GameScene {
 	Model* model_ = nullptr;
 	//ワールドトランスフォーム
 	const int maxX = 9;
-	const int maxY = 9;
-	const int maxZ = 9;
-	WorldTransform worldTransform_[9][9][9];
+	WorldTransform worldTransform_[9];
+	float angle[9] = {0};
+	const float length = 10;
 	//ビュープロジェクション
 	ViewProjection viewProjection_;
 

@@ -20,22 +20,27 @@ void GameScene::Initialize() {
 	textureHandle_ = TextureManager::Load("kasuga.png");
 	//モデル初期化
 	model_ = Model::Create();
-	for (size_t y = 0; y < maxY; y++) {
-
-		for (size_t x = 0; x < maxX; x++) {
-			for (size_t z = 0; z < maxZ; z++) {
-				// x,y,zの位置を設定
-				worldTransform_[y][x][z].translation_ = {-20.0f + 5 * x, 20.0f - 5 * y, 5.0f + 5 * z};
-				//ワールドトランスフォーム初期化
-				worldTransform_[y][x][z].Initialize();
-			}
-		}
+	for (size_t x = 0; x < maxX; x++) {
+		//角度設定
+		angle[x] = {x * (XM_PI / 4)};
+		// x,y,zの位置を設定
+		worldTransform_[x].translation_ = {
+		  0 + cosf(angle[x]) * length, 0 + -sinf(angle[x]) * length, 0};
+		//ワールドトランスフォーム初期化
+		worldTransform_[x].Initialize();
 	}
 	//ビュープロジェクション初期化
 	viewProjection_.Initialize();
 }
 
-void GameScene::Update() {
+void GameScene::Update() { 
+	for (size_t x = 0; x < maxX; x++) {
+		angle[x] += 0.01f;
+		worldTransform_[x].translation_ = {
+		  0 + cosf(angle[x]) * length, 0 + -sinf(angle[x]) * length, 0};
+
+		worldTransform_[x].UpdateMatrix();
+	}
 }
 
 void GameScene::Draw() {
@@ -64,13 +69,8 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	for (size_t y = 0; y < maxY; y++) {
-
-		for (size_t x = 0; x < maxX; x++) {
-			for (size_t z = 0; z < maxZ; z++) {
-				model_->Draw(worldTransform_[y][x][z], viewProjection_, textureHandle_);
-			}
-		}
+	for (size_t x = 0; x < maxX; x++) {
+		model_->Draw(worldTransform_[x], viewProjection_, textureHandle_);
 	}
 
 	// 3Dオブジェクト描画後処理
