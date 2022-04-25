@@ -2,6 +2,7 @@
 #include "TextureManager.h"
 #include <cassert>
 #include <random>
+#include <Math.h>
 
 using namespace DirectX;
 
@@ -20,15 +21,6 @@ void GameScene::Initialize() {
 	debugText_ = DebugText::GetInstance();
 	textureHandle_ = TextureManager::Load("kasuga.png");
 
-	//乱数シード生成器
-	std::random_device seed_gen;
-	//メルセンヌツイスター
-	std::mt19937_64 engine(seed_gen());
-	//乱数範囲（回転角用）
-	std::uniform_real_distribution<float> rotDist(0.0f, XM_2PI);
-	//乱数範囲（座標用）
-	std::uniform_real_distribution<float> posDist(-30.0f, 30.0f);
-
 	//モデル初期化
 	model_ = Model::Create();
 	
@@ -38,29 +30,21 @@ void GameScene::Initialize() {
 	worldTransform_.Initialize();
 	
 	//ビュープロジェクション初期化
-	for (size_t i = 0; i < _countof(viewProjection_); i++) {
-		viewProjection_[i].eye = {posDist(engine), posDist(engine), posDist(engine)};
-		viewProjection_[i].Initialize();
-	}
+	viewProjection_.eye = {0, 0, -10};
+	length = 10;
+	viewProjection_.Initialize();
+	
 }
 
 void GameScene::Update() {
-	if (input_->TriggerKey(DIK_SPACE)) {
-		viewNum++;
-	}
-	if (viewNum >= 3) {
-		viewNum = 0;
-	}
+	
+	angle += 0.05;
 
-	for (size_t i = 0; i < _countof(viewProjection_);i++)
-	{
-		debugText_->SetPos(50, 50 + 30 * i);
-		debugText_->Printf(
-		  "camera %d: eye%f,%f,%f target%f,%f,%f up%f,%f,%f",i+1, viewProjection_[i].eye.x,
-		  viewProjection_[i].eye.y, viewProjection_[i].eye.z, viewProjection_[i].target.x,
-		  viewProjection_[i].target.y, viewProjection_[i].target.z, viewProjection_[i].up.x,
-		  viewProjection_[i].up.y, viewProjection_[i].up.z);
-	}
+	 viewProjection_.eye = {
+	  worldTransform_.translation_.x + sinf(angle) * length, viewProjection_.eye.y,
+	  worldTransform_.translation_.z + cosf(angle) * length};
+
+	 viewProjection_.UpdateMatrix();
 }
 
 void GameScene::Draw() {
@@ -89,7 +73,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	model_->Draw(worldTransform_, viewProjection_[viewNum], textureHandle_);
+	model_->Draw(worldTransform_, viewProjection_, textureHandle_);
 	
 
 	// 3Dオブジェクト描画後処理

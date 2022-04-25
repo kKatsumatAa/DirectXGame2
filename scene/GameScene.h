@@ -56,8 +56,9 @@ class GameScene {
 	//ワールドトランスフォーム
 	WorldTransform worldTransform_;
 	//ビュープロジェクション
-	ViewProjection viewProjection_[3];
-	int viewNum = 0;
+	ViewProjection viewProjection_;
+	float length = 0;
+	float angle = 0;
 	////サウンドデータハンドル
 	// uint32_t soundDataHandle_ = 0;
 
