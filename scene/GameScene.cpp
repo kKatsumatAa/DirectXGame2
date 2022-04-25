@@ -27,95 +27,40 @@ void GameScene::Initialize() {
 	//乱数範囲（回転角用）
 	std::uniform_real_distribution<float> rotDist(0.0f, XM_2PI);
 	//乱数範囲（座標用）
-	std::uniform_real_distribution<float> posDist(-10.0f, 10.0f);
-
+	std::uniform_real_distribution<float> posDist(-30.0f, 30.0f);
 
 	//モデル初期化
 	model_ = Model::Create();
-
-	for (size_t i = 0; i < _countof(worldTransform_); i++) {
-
-		// x,y,z方向のスケーリングを設定
-		worldTransform_[i].scale_ = {1.0f, 1.0f, 1.0f};
-		// x,y,z軸回りの回転角を設定
-		worldTransform_[i].rotation_ = {rotDist(engine), rotDist(engine), rotDist(engine)};
-		// x,y,zの位置を設定
-		worldTransform_[i].translation_ = {posDist(engine), posDist(engine), posDist(engine)};
-		//ワールドトランスフォーム初期化
-		worldTransform_[i].Initialize();
-	}
-
-	//カメラの視点座標を設定
-	viewProjection_.eye = {0, 0, -50};
-
-	//カメラ注視点座標を設定
-	viewProjection_.target = {10, 0, 0};
-
+	
+	// x,y,zの位置を設定
+	worldTransform_.translation_ = {0, 0, 0};
+	//ワールドトランスフォーム初期化
+	worldTransform_.Initialize();
+	
 	//ビュープロジェクション初期化
-	viewProjection_.Initialize();
-
-	//カメラ上方向ベクトルを設定（右上90度指定）
-	viewProjection_.up = {cosf(XM_PI / 2.0f),
-		sinf(XM_PI / 2.0f), 0.0f};
+	for (size_t i = 0; i < _countof(viewProjection_); i++) {
+		viewProjection_[i].eye = {posDist(engine), posDist(engine), posDist(engine)};
+		viewProjection_[i].Initialize();
+	}
 }
 
 void GameScene::Update() {
-	
-	//視点の移動ベクトル
-	XMFLOAT3 move1 = {0, 0, 0};
-	//視点の移動速さ
-	const float kEyeSpeed = 0.2f;
-	
-	//注視点の移動ベクトル
-	XMFLOAT3 move = {0, 0, 0};
-	//注視点の移動速さ
-	const float kTargetSpeed = 0.2f;
+	if (input_->TriggerKey(DIK_SPACE)) {
+		viewNum++;
+	}
+	if (viewNum >= 3) {
+		viewNum = 0;
+	}
 
-	//上方向の回転移動速さ[ラジアン/frame]
-	const float kUpRotSpeed = 0.05f;
-
-	//押した方向で移動ベクトルを変更
-	if (input_->PushKey(DIK_W)) {
-		move1 = {0, 0, kEyeSpeed};
-	} else if (input_->PushKey(DIK_S)) {
-		move1 = {0, 0, -kEyeSpeed};
+	for (size_t i = 0; i < _countof(viewProjection_);i++)
+	{
+		debugText_->SetPos(50, 50 + 30 * i);
+		debugText_->Printf(
+		  "camera %d: eye%f,%f,%f target%f,%f,%f up%f,%f,%f",i+1, viewProjection_[i].eye.x,
+		  viewProjection_[i].eye.y, viewProjection_[i].eye.z, viewProjection_[i].target.x,
+		  viewProjection_[i].target.y, viewProjection_[i].target.z, viewProjection_[i].up.x,
+		  viewProjection_[i].up.y, viewProjection_[i].up.z);
 	}
-	if (input_->PushKey(DIK_LEFT)) {
-		move = {-kTargetSpeed, 0, 0};
-	} else if (input_->PushKey(DIK_RIGHT)) {
-		move = {kTargetSpeed, 0, 0};
-	}
-	if (input_->PushKey(DIK_SPACE)) {
-		viewAngle += kUpRotSpeed;
-		//2π超えたら0に戻す
-		viewAngle = fmodf(viewAngle, XM_2PI);
-	}
-	//視点移動（ベクトルの加算）
-	viewProjection_.eye.x += move1.x;
-	viewProjection_.eye.y += move1.y;
-	viewProjection_.eye.z += move1.z;
-	//視点移動（ベクトルの加算）
-	viewProjection_.target.x += move.x;
-	viewProjection_.target.y += move.y;
-	viewProjection_.target.z += move.z;
-	//上方向ベクトルを計算（半径1の円周上の座標）
-	viewProjection_.up = {cosf(viewAngle), 
-		sinf(viewAngle), 0.0f};
-	//行列の再計算
-	viewProjection_.UpdateMatrix();
-	//デバック用表示
-	debugText_->SetPos(50, 50);
-	debugText_->Printf(
-	  "eye: %f,%f,%f\n", viewProjection_.eye.x, 
-		viewProjection_.eye.y, viewProjection_.eye.z);
-	debugText_->SetPos(50, 70);
-	debugText_->Printf(
-	  "target: %f,%f,%f\n", viewProjection_.target.x,
-		viewProjection_.target.y, viewProjection_.target.z);
-	debugText_->SetPos(50, 90);
-	debugText_->Printf(
-	  "up: %f,%f,%f\n", viewProjection_.up.x, viewProjection_.up.y, viewProjection_.up.z);
-	
 }
 
 void GameScene::Draw() {
@@ -144,9 +89,8 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	for (size_t i = 0; i < _countof(worldTransform_); i++) {
-		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
-	}
+	model_->Draw(worldTransform_, viewProjection_[viewNum], textureHandle_);
+	
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
