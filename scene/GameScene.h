@@ -56,6 +56,8 @@ class GameScene {
 	//ワールドトランスフォーム
 	WorldTransform worldTransform_[30];
 	WorldTransform worldTransform_bullet[10];
+	bool isAlive[30] = {true};
+	float length = 0;
 	//ビュープロジェクション
 	ViewProjection viewProjection_;
 

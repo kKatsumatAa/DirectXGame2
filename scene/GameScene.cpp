@@ -2,6 +2,7 @@
 #include "TextureManager.h"
 #include <cassert>
 #include <random>
+#include "Util.h"
 
 using namespace DirectX;
 
@@ -47,7 +48,9 @@ void GameScene::Initialize() {
 		worldTransform_bullet[i].scale_ = {0.3f, 0.3f, 0.3f};
 		worldTransform_bullet[i].Initialize();
 	}
-
+	for (size_t i = 0; i < _countof(worldTransform_); i++) {
+		isAlive[i] = true;
+	}
 	// 床のx,y,z方向のスケーリングを設定
 	worldTransform_[1].scale_ = {50.0f, 1.0f, 50.0f};
 	// 床のx,y,zの位置を設定
@@ -76,22 +79,22 @@ void GameScene::Update() {
 	XMFLOAT3 normalFLength = {0, 0, 0};
 
 	//弾用
-	const float shotVelocity = 5.0f;
+	const float shotVelocity = 2.0f;
 
 	const float frontSpeed = 0.5f;
 
 	//y軸中心回転
 	if (input_->PushKey(DIK_LEFT)) {
-		worldTransform_[0].rotation_.y -= frontSpeed / 10;
+		worldTransform_[0].rotation_.y -= frontSpeed / 15;
 	}if (input_->PushKey(DIK_RIGHT)) {
-		worldTransform_[0].rotation_.y += frontSpeed / 10;
+		worldTransform_[0].rotation_.y += frontSpeed / 15;
 	}
 	//x軸中心回転
 	if (input_->PushKey(DIK_UP) && worldTransform_[0].rotation_.x < XM_PI / 2) {
-		worldTransform_[0].rotation_.x += frontSpeed / 10;
+		worldTransform_[0].rotation_.x += frontSpeed / 15;
 	}
 	if (input_->PushKey(DIK_DOWN) && worldTransform_[0].rotation_.x > (-XM_PI / 2)) {
-		worldTransform_[0].rotation_.x -= frontSpeed / 10;
+		worldTransform_[0].rotation_.x -= frontSpeed / 15;
 	}
 
 	//正面ベクトルの終点を、オブジェクトの回転に合わせて一緒に回転
@@ -192,6 +195,20 @@ void GameScene::Update() {
 		worldTransform_bullet[i].UpdateMatrix();
 	}
 
+	//弾と敵の当たり判定
+	for (size_t i = 0; i < _countof(worldTransform_bullet); i++) 
+	{
+		for (size_t j = 2; j < _countof(worldTransform_); j++) 
+		{
+			if (isShot[i] && isAlive[j] && 
+				CircleCollision(worldTransform_[j], worldTransform_bullet[i]))
+			{
+				isAlive[j] = false;
+				isShot[i] = false;
+			}
+		}
+	}
+
 	debugText_->SetPos(50, 130);
 	debugText_->Printf("shotTimer: %d\n", shotTimer[0]);
 }
@@ -223,6 +240,7 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	for (size_t i = 1; i < _countof(worldTransform_); i++) {
+		if (isAlive[i])
 		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
 	}
 
