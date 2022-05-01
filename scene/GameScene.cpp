@@ -100,8 +100,9 @@ void GameScene::Update() {
 	//正面ベクトルの終点を、オブジェクトの回転に合わせて一緒に回転
 	endPoint = {
 	  worldTransform_[0].translation_.x + sinf(worldTransform_[0].rotation_.y) * frontLength,
-	  worldTransform_[0].translation_.y + sinf(worldTransform_[0].rotation_.x) * frontLength,//yだけx軸中心の角度使う
-	  worldTransform_[0].translation_.z + cosf(worldTransform_[0].rotation_.y) * frontLength};
+	  worldTransform_[0].translation_.y + sinf(worldTransform_[0].rotation_.x) * frontLength,
+	  worldTransform_[0].translation_.z +
+	    cosf(worldTransform_[0].rotation_.y) * cosf(worldTransform_[0].rotation_.x) * frontLength};
 
 	//正面ベクトルの成分を計算
 	vecFront = {
