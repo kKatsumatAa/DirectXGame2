@@ -25,25 +25,27 @@ void GameScene::Initialize() {
 	model_ = Model::Create();
 	
 	// x,y,zの位置を設定
-	worldTransform_.translation_ = {0, 0, 0};
-	//ワールドトランスフォーム初期化
-	worldTransform_.Initialize();
+	worldTransform_[0].translation_ = {-2.0f, -2.0f, 0};
+	worldTransform_[1].translation_ = {2.0f, -2.0f, 0};
+	worldTransform_[2].translation_ = {0, 2.0f, 0};
+
+	for (size_t i = 0; i < _countof(worldTransform_); i++) {
+		//ワールドトランスフォーム初期化
+		worldTransform_[i].Initialize();
+	}
 	
 	//ビュープロジェクション初期化
 	viewProjection_.eye = {0, 0, -10};
-	length = 10;
 	viewProjection_.Initialize();
 	
 }
 
 void GameScene::Update() {
-	
-	angle += 0.05;
-
-	 viewProjection_.eye = {
-	  worldTransform_.translation_.x + sinf(angle) * length, viewProjection_.eye.y,
-	  worldTransform_.translation_.z + cosf(angle) * length};
-
+	if (input_->TriggerKey(DIK_SPACE)) targetNum++;
+	if (targetNum >= 3) targetNum = 0;
+	viewProjection_.target.x = worldTransform_[targetNum].translation_.x;
+	viewProjection_.target.y = worldTransform_[targetNum].translation_.y;
+	viewProjection_.target.z = worldTransform_[targetNum].translation_.z;
 	 viewProjection_.UpdateMatrix();
 }
 
@@ -73,8 +75,9 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	model_->Draw(worldTransform_, viewProjection_, textureHandle_);
-	
+	for (size_t i = 0; i < _countof(worldTransform_); i++) {
+		model_->Draw(worldTransform_[i], viewProjection_, textureHandle_);
+	}
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
